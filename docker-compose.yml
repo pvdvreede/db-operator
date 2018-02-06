@@ -1,0 +1,31 @@
+---
+version: "2.3"
+
+x-base: &base
+  build: .
+  volumes:
+    - ".:/app"
+
+services:
+  cabal:
+    <<: *base
+    entrypoint:
+      - cabal
+
+  go:
+    <<: *base
+    entrypoint:
+      - cabal
+      - run
+
+  build:
+    <<: *base
+    entrypoint:
+      - cabal
+      - build
+
+  repl:
+    <<: *base
+    entrypoint:
+      - cabal
+      - repl
