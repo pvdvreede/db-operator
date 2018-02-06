@@ -9,10 +9,10 @@ stdoutInterpreter action = case action of
   (WatchPostgresDbs next) -> do
     putStrLn "Watching for CRDS..."
     threadDelay 10000000
-    next (PostgresDb)
+    next $ PostgresCrdEvent Create (PostgresDbCrd "testcrd" "default" (PostgresCrdSpec 22 "large") (PostgresCrdStatus "" ""))
   (GetDatabase id next) -> do
     putStrLn "Getting database..."
-    next $ Just (Database id 22)
+    next $ Just (Database id 22 "large")
   (CreateDatabase db next) -> do
     putStrLn "Creating database..."
     next db
