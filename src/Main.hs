@@ -1,33 +1,35 @@
 module Main where
 
-import Control.Monad.Free
 import Control.Concurrent
+import Database
+import Kubernetes
 import Operator
 
-stdoutInterpreter :: DbOperatorActions (IO next) -> IO next
-stdoutInterpreter action = case action of
-  (WatchPostgresDbs next) -> do
-    putStrLn "Watching for CRDS..."
-    threadDelay 10000000
-    next (PostgresDb)
-  (GetDatabase id next) -> do
+
+instance MonadPostgresDatabase IO where
+  getDatabase id = do
     putStrLn "Getting database..."
-    next $ Just (Database id 22)
-  (CreateDatabase db next) -> do
-    putStrLn "Creating database..."
-    next db
-  (UpdateCrdState crd state next) -> do
-    putStrLn "Updating CRD state..."
-    next
-  (GetSecret name next) -> do
-    putStrLn "Getting Secret..."
-    next $ Just (DbSecret "a" "b" "c" 1234 "d")
-  (CreateSecret scrt next) -> do
-    putStrLn "Creating Secret..."
-    next
-  (UpdateSecret scrt next) -> do
-    putStrLn "Updating Secret..."
-    next
+    return $ Nothing
+  createDatabaseServer req = do
+    putStrLn "creating DB"
+    return (Database "test" 12 "last" (Connection "a" 0 "b" "c" "d"))
+  generatePassword  = return "mypasswd"
+
+instance MonadKubernetes IO where
+  doesCRDExist = return False
+  getSecret n ns = do
+    putStrLn "Getting secret"
+    return Nothing
+  createSecret scrt = do
+    putStrLn "Creating secret..."
+  updateSecret scrt = do
+    putStrLn "Updating secret..."
+  waitForCRDEvent = do
+    threadDelay 10000000
+    return $ PostgresCRDEvent Create (PostgresCRD "name" "ns" (PostgresCRDSpec 12 "large") (PostgresCRDStatus "" ""))
+  updateCRD crd = do
+    putStrLn "Updating CRD..."
+
 
 main :: IO ()
-main = iterM stdoutInterpreter $ startWatching
+main = startWatching

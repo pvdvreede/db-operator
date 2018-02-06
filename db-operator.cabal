@@ -17,7 +17,9 @@ cabal-version:       >=1.10
 
 executable db-operator
   main-is:             Main.hs
-  other-modules:       Operator
+  other-modules:       Database
+                     , Kubernetes
+                     , Operator
   -- other-extensions:
   build-depends:       base >=4.10 && <4.11
                      , free
